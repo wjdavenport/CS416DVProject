@@ -62,16 +62,6 @@
           d.delay = i * animationSpeed;
         });
 
-        // Insert an annotation to inform the user about the initial animation
-        d3.select("#map")
-          .append("text")
-          .attr("class", "annotation-text")
-          .attr("x", 50)
-          .attr("y", 30)
-          .style("font-weight", "bold")
-          .style("font-size", "18px")
-          .text("Initial animation");
-
         d3.select("#map")
           .selectAll(".initial-dots")
           .data(volcanoData)
