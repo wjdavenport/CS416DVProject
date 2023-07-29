@@ -110,7 +110,7 @@
     // Load world map GeoJSON data
     d3.json("countries.geojson").then(function(worldData) {
       const projection = d3.geoMercator()
-        .center([-19.02, 64.96])
+        .center([-157.9, 21.5])
         .scale(2500)
         .translate([600,450]);
         // .fitSize([1200, 800], worldData);
@@ -280,7 +280,7 @@
           .attr("class", "title-text")
           .attr("x", 600) // Centre of the SVG
           .attr("y", 30) // Top of the SVG
-          .text("Iceland Eruptions during the Holocene Epoch (c. 11,700 BCE to the present)")
+          .text("Hawaiian Eruptions during the Holocene Epoch (c. 11,700 BCE to the present)")
           .style("opacity", 1)
           .style("font-weight", "bold")
           .transition()
@@ -356,10 +356,10 @@
         }, annotationDelay);
 
         svg.transition()
-          .duration(60000) // Adjust as needed
+          .duration(30000) // Adjust as needed
           .tween("projection", function() {
             const r = d3.interpolate(projection.rotate(), [0, 0]);
-            const s = d3.interpolate(projection.scale(), 600);
+            const s = d3.interpolate(projection.scale(), 750);
             return function(t) {
               projection.rotate(r(t));
               projection.scale(s(t));
@@ -376,8 +376,8 @@
       console.log("Error loading map data: " + error);
     });
   </script>
-  <form action="scene3.html">
-    <input type="submit" value="See Hawaiian Holocene eruptions"/>
+  <form action="scene2.html">
+    <input type="submit" value="See World Holocene eruptions"/>
   </form>
 
 </body>
