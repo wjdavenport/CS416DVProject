@@ -106,8 +106,6 @@
         .append("path")
         .attr("d", pathGenerator);
 
-      
-
       d3.csv("GVP_Volcano_List_Holocene1.csv").then(function(volcanoData) {
         volcanoData.forEach(function(d) {
           d.latitude = +d.Latitude;
@@ -149,7 +147,13 @@
           })
           .attr("r", 1)
           .append("title") // append a title to each circle
-          .text(d => d["Tectonic Setting"]); // set the title text to the Tectonic Setting
+          .text(d => {
+            let eruptionYear = 'Unknown';
+            if (d["Last Known Eruption"] !== "Unknown") {
+              eruptionYear = d.eruptionYear.getFullYear();
+            }
+            return `Tectonic Setting: ${d["Tectonic Setting"]}, Last Known Eruption: ${eruptionYear}`;
+          }); // set the title text to the Tectonic Setting and the year of the last known eruption
 
         const svg = d3.select("#map");
         const annotationDelay = 1;
