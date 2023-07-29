@@ -111,7 +111,7 @@
     d3.json("countries.geojson").then(function(worldData) {
       const projection = d3.geoMercator()
         .center([-157.9, 21.5])
-        .scale(2500)
+        .scale(3500)
         .translate([600,450]);
         // .fitSize([1200, 800], worldData);
 
@@ -153,7 +153,7 @@
 
         volcanoData.sort((a, b) => a.eruptionYear - b.eruptionYear);
 
-        const animationSpeed = 90;
+        const animationSpeed = 45;
         volcanoData.forEach(function(d, i) {
           d.delay = i * animationSpeed;
         });
@@ -359,7 +359,7 @@
           .duration(30000) // Adjust as needed
           .tween("projection", function() {
             const r = d3.interpolate(projection.rotate(), [0, 0]);
-            const s = d3.interpolate(projection.scale(), 750);
+            const s = d3.interpolate(projection.scale(), 4000);
             return function(t) {
               projection.rotate(r(t));
               projection.scale(s(t));
