@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Volcano Map Visualization</title>
+  <style>
+    .volcano-circle {
+      fill: orange;
+      stroke: #fff;
+      stroke-width: 0.1;
+    }
+
+    .annotation-text {
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+      fill: blueviolet;
+      text-anchor: middle;
+      opacity: 0.7;
+    }
+
+    .title-text {
+      font-family: Arial, sans-serif;
+      font-size: 26px;
+      fill: orangered;
+      text-anchor: middle;
+      opacity: 0;
+    }
+
+    .title-background {
+      opacity: 0;
+    }
+
+    .extra-annotation1 {
+      font-family: Arial, sans-serif;
+      font-size: 26px;
+      fill: orange;
+      text-anchor: middle;
+      opacity: 0;
+    }
+
+    .annotation1-background {
+      opacity: 0;
+    }
+
+    .annotation2-background {
+      opacity: 0;
+    } 
+
+    .annotation3-background {
+      opacity: 0;
+    }
+
+    .extra-annotation2 {
+      font-family: Arial, sans-serif;
+      font-size: 26px;
+      fill: red;
+      text-anchor: middle;
+      opacity: 0;
+    }
+
+    .extra-annotation3 { 
+      font-family: Arial, sans-serif;
+      font-size: 26px;
+      fill: blueviolet;
+      text-anchor: middle;
+      opacity: 0;
+    }
+
+    .annotation-box {
+      fill:white;
+      opacity: 0.4;
+    }
+
+    .annotation-box3 {
+      fill: white;
+      opacity: 0.4;
+
+    }
+
+  </style>
+</head>
+<body>
+  <svg id="map" width="1200" height="900"></svg>
+
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script>
+    // Load world map GeoJSON data
+    d3.json("countries.geojson").then(function(worldData) {
+      const projection = d3.geoMercator()
+        .fitSize([1200, 900], worldData);
+
+      const pathGenerator = d3.geoPath().projection(projection);
+
+      const svg = d3.select("#map");
+
+      svg.selectAll("path")
+        .data(worldData.features)
+        .enter()
+        .append("path")
+        .attr("d", pathGenerator);
+
+
+      d3.select("#map")
+        .selectAll("path")
+        .data(worldData.features)
+        .enter()
+        .append("path")
+        .attr("d", pathGenerator);
+
+      d3.csv("GVP_Volcano_List_Holocene1.csv").then(function(volcanoData) {
+        volcanoData.forEach(function(d) {
+          d.latitude = +d.Latitude;
+          d.longitude = +d.Longitude;
+          if (d["Last Known Eruption"] === "Unknown") {
+            d.eruptionYear = new Date("-99999");
+          } else {
+            const eruptionYear = d["Last Known Eruption"];
+            if (eruptionYear.endsWith("BCE")) {
+              const year = parseInt(eruptionYear.split(" ")[0]);
+              d.eruptionYear = new Date(-year, 0);
+            } else {
+              const year = parseInt(eruptionYear);
+              d.eruptionYear = new Date(year, 0);
+            }
+          }
+        });
+
+        volcanoData.sort((a, b) => a.eruptionYear - b.eruptionYear);
+
+        const animationSpeed = 90;
+        volcanoData.forEach(function(d, i) {
+          d.delay = i * animationSpeed;
+        });
+
+        d3.select("#map")
+          .selectAll(".initial-dots")
+          .data(volcanoData)
+          .enter()
+          .append("circle")
+          .attr("class", "volcano-circle initial-dots")
+          .attr("cx", function(d) {
+            const cx = projection([d.longitude, d.latitude])[0];
+            return cx;
+          })
+          .attr("cy", function(d) {
+            const cy = projection([d.longitude, d.latitude])[1];
+            return cy;
+          })
+          .attr("r", 1)
+          .append("title") // append a title to each circle
+          .text(d => {
+            let eruptionYear = 'Unknown';
+            if (d["Last Known Eruption"] !== "Unknown") {
+              eruptionYear = d.eruptionYear.getFullYear();
+            }
+            return `Tectonic Setting: ${d["Tectonic Setting"]}, Last Known Eruption: ${eruptionYear}`;
+          }); // set the title text to the Tectonic Setting and the year of the last known eruption
+
+        const svg = d3.select("#map");
+        const annotationDelay = 1;
+
+        // Add title background
+        svg.append("rect")
+          .attr("class", "title-background")
+          .attr("x", 120) 
+          .attr("y", 4) 
+          .attr("width", 960) 
+          .attr("height", 36) 
+          .style("fill", "white")
+          .style("stroke", "black")
+          .style("stroke-width", 2)
+          .style("opacity", 0)
+          .transition()
+          .delay(20) // After 20 milliseconds
+          .style("opacity", 1); // Fade in  
+
+        // Add annotation1 background
+        svg.append("rect")
+          .attr("class", "annotation1-background")
+          .attr("x", 330) // Adjust these values
+          .attr("y", 70) // Adjust these values
+          .attr("width", 424) // Adjust these values
+          .attr("height", 36) // Adjust these values
+          .style("fill", "white")
+          .style("stroke", "black")
+          .style("stroke-width", 2)
+          .style("opacity", 0)
+          .transition()
+          .delay(2800) // After 2.8 sec
+          .style("opacity", 1) // Fade in 
+          .transition()
+          .delay(4000) // After 4000 milliseconds
+          .style("opacity", 0); // Fade out
+
+        // Add annotation2 background
+        svg.append("rect")
+          .attr("class", "annotation2-background")
+          .attr("x", 320) // Adjust these values
+          .attr("y", 70) // Adjust these values
+          .attr("width", 480) // Adjust these values
+          .attr("height", 36) // Adjust these values
+          .style("fill", "white")
+          .style("stroke", "black")
+          .style("stroke-width", 2)
+          .style("opacity", 0)
+          .transition()
+          .delay(6000) // After 6 seconds
+          .style("opacity", 1) // Fade in 
+          .transition()
+          .delay(4000) // After 4000 milliseconds
+          .style("opacity", 0); // Fade out
+
+        // Add annotation3 background
+        svg.append("rect")
+          .attr("class", "annotation3-background")
+          .attr("x", 260) // Adjust these values
+          .attr("y", 74) // Adjust these values
+          .attr("width", 680) // Adjust these values
+          .attr("height", 36) // Adjust these values
+          .style("fill", "white")
+          .style("stroke", "black")
+          .style("stroke-width", 2)
+          .style("opacity", 0)
+          .transition()
+          .delay(12000) // After 12 seconds
+          .style("opacity", 1); // Fade in
+
+        // Add title
+        svg.append("text")
+          .attr("class", "title-text")
+          .attr("x", 600) // Centre of the SVG
+          .attr("y", 30) // Top of the SVG
+          .text("Volcanic Eruptions during the Holocene Epoch (c. 11,700 BCE to the present)")
+          .style("opacity", 1)
+          .style("font-weight", "bold")
+          .transition()
+          .delay(2000) // After 2000 milliseconds
+          .style("opacity", 1); // Fade out
+
+        // Next Annotations
+
+        setTimeout(() => {
+          svg.append("text")
+            .attr("class", "extra-annotation1")
+            .attr("x", 540) // Centre of the SVG
+            .attr("y", 96)  // A bit below the title
+            .text("All eruption sites marked in orange")
+            .style("opacity", 1) // Fade in
+            .transition()
+            .delay(2000) // After 2000 milliseconds
+            .style("opacity", 0); // Fade out
+        }, 3000); // Appear after 3000 milliseconds
+
+        setTimeout(() => {
+          svg.append("text")
+            .attr("class", "extra-annotation2")
+            .attr("x", 560) // Centre of the SVG
+            .attr("y", 96) // A bit below the title
+            .text("Eruptions marked in red for known years")
+            .style("opacity", 1) // Fade in
+            .transition()
+            .delay(4000) // After 2000 msec
+            .style("opacity", 0); // Fade out
+        }, 6000); // Appear after 6 seconds
+
+        setTimeout(() => {
+          svg.append("text")
+            .attr("class", "extra-annotation3")
+            .attr("x", 600) // Centre of the SVG
+            .attr("y", 100) // A bit below the title
+            .text("Hover over an eruption to see its type, depth, and year")
+            .style("opacity", 1) // Fade in
+            .style("font-weight", "bold")
+            .transition()
+            .delay(6000) // After 2000 msec
+            .style("opacity", 1); // Fade out
+        }, 12000); // Appear after 12 seconds
+
+        svg.append("text")
+          .attr("class", "annotation-text")
+          .attr("x", 200)
+          .attr("y", 100)
+          .style("opacity", 0)
+          .style("font-weight", "bold")
+          .style("font-size", "24px");
+
+        setTimeout(function() {
+          d3.selectAll(".initial-dots")
+            .transition()
+            .delay(d => d.delay)
+            .duration(animationSpeed)
+            .attr("class", "volcano-circle")
+            .attr("r", d => d["Last Known Eruption"] !== "Unknown" ? 3 : 1)
+            .style("fill", d => d["Last Known Eruption"] !== "Unknown" ? "red" : "orange")
+            .on("end", function(d, i) {
+              if (d["Last Known Eruption"] !== "Unknown") {
+                const eruptionYear = d.eruptionYear.getFullYear();
+                svg.select(".annotation-text") // select the existing text element
+                  .text(eruptionYear) // update its text
+                  .style("opacity", 0) // start with 0 opacity
+                  .transition()
+                  .delay(annotationDelay)
+                  .style("opacity", 1); // make it fully visible
+              }
+            });
+        }, annotationDelay);
+
+      }).catch(function(error) {
+        console.log("Error loading volcano data: " + error);
+      });
+    }).catch(function(error) {
+      console.log("Error loading map data: " + error);
+    });
+  </script>
+</body>
+</html>
