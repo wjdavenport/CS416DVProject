@@ -76,17 +76,44 @@
 
     }
 
+    .tooltip {
+        position: absolute;
+        text-align: center;
+        padding: 8px;
+        font: 12px sans-serif;
+        background: white;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+    }
+
+    #sceneswitch{
+        display: none;
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translate(-50%, -50%)
+    }
+
   </style>
 </head>
 <body>
-  <svg id="map" width="1200" height="900"></svg>
+  <svg id="map" width="1200" height="800"></svg>
 
   <script src="https://d3js.org/d3.v6.min.js"></script>
   <script>
+
+  const tooltipDiv = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
     // Load world map GeoJSON data
     d3.json("countries.geojson").then(function(worldData) {
       const projection = d3.geoMercator()
-        .fitSize([1200, 900], worldData);
+        .center([-19.02, 64.96])
+        .scale(2500)
+        .translate([600,450]);
+        // .fitSize([1200, 800], worldData);
 
       const pathGenerator = d3.geoPath().projection(projection);
 
@@ -146,6 +173,30 @@
             return cy;
           })
           .attr("r", 1)
+          .on("click", function(event, d) {
+              let eruptionYear = 'Unknown';
+              if (d["Last Known Eruption"] !== "Unknown") {
+                eruptionYear = d.eruptionYear.getFullYear();
+              }
+              const tooltipText = `Tectonic Setting: ${d["Tectonic Setting"]}, Last Known Eruption: ${eruptionYear}`;
+              tooltipDiv.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+              tooltipDiv.html(tooltipText)
+                    .style("left", (d3.pointer(event)[0]) + "px")
+                    .style("top", (d3.pointer(event)[1]) + "px");
+            })
+            .on("mouseout", function(d) {
+                tooltipDiv.transition()
+                    .duration(3500)
+                    .style("opacity", 0);
+            })
+          /*
+          .on("mouseout", function(d) {
+              tooltipDiv.transition()
+                  .duration(500)
+                  .style("opacity", 0);
+          })
           .append("title") // append a title to each circle
           .text(d => {
             let eruptionYear = 'Unknown';
@@ -154,7 +205,7 @@
             }
             return `Tectonic Setting: ${d["Tectonic Setting"]}, Last Known Eruption: ${eruptionYear}`;
           }); // set the title text to the Tectonic Setting and the year of the last known eruption
-
+          */
         const svg = d3.select("#map");
         const annotationDelay = 1;
 
@@ -229,7 +280,7 @@
           .attr("class", "title-text")
           .attr("x", 600) // Centre of the SVG
           .attr("y", 30) // Top of the SVG
-          .text("Volcanic Eruptions during the Holocene Epoch (c. 11,700 BCE to the present)")
+          .text("Iceland Eruptions during the Holocene Epoch (c. 11,700 BCE to the present)")
           .style("opacity", 1)
           .style("font-weight", "bold")
           .transition()
@@ -267,7 +318,7 @@
             .attr("class", "extra-annotation3")
             .attr("x", 600) // Centre of the SVG
             .attr("y", 100) // A bit below the title
-            .text("Hover over an eruption to see its type, depth, and year")
+            .text("Click on an eruption to see its type, depth, and year")
             .style("opacity", 1) // Fade in
             .style("font-weight", "bold")
             .transition()
@@ -304,6 +355,20 @@
             });
         }, annotationDelay);
 
+        svg.transition()
+          .duration(60000) // Adjust as needed
+          .tween("projection", function() {
+            const r = d3.interpolate(projection.rotate(), [0, 0]);
+            const s = d3.interpolate(projection.scale(), 600);
+            return function(t) {
+              projection.rotate(r(t));
+              projection.scale(s(t));
+              svg.selectAll("path").attr("d", pathGenerator);
+              svg.selectAll("circle").attr("cx", d => projection([d.longitude, d.latitude])[0])
+                .attr("cy", d => projection([d.longitude, d.latitude])[1]);
+            };
+        });
+
       }).catch(function(error) {
         console.log("Error loading volcano data: " + error);
       });
@@ -311,5 +376,9 @@
       console.log("Error loading map data: " + error);
     });
   </script>
+  <form action="scene2.html">
+    <input type="submit" value="See World Holocene eruptions"/>
+  </form>
+
 </body>
 </html>

@@ -79,14 +79,14 @@
   </style>
 </head>
 <body>
-  <svg id="map" width="1200" height="900"></svg>
+  <svg id="map" width="1200" height="800"></svg>
 
   <script src="https://d3js.org/d3.v6.min.js"></script>
   <script>
     // Load world map GeoJSON data
     d3.json("countries.geojson").then(function(worldData) {
       const projection = d3.geoMercator()
-        .fitSize([1200, 900], worldData);
+        .fitSize([1200, 800], worldData);
 
       const pathGenerator = d3.geoPath().projection(projection);
 
@@ -311,5 +311,8 @@
       console.log("Error loading map data: " + error);
     });
   </script>
+    <form action="scene1.html">
+      <input type="submit" value="Return to Iceland eruptions"/>
+    </form>
 </body>
 </html>
