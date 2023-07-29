@@ -25,11 +25,27 @@
       opacity: 0;
     }
 
+    .title-background {
+      opacity: 0;
+    }
+
     .extra-annotation1 {
       font-family: Arial, sans-serif;
       font-size: 26px;
       fill: orange;
       text-anchor: middle;
+      opacity: 0;
+    }
+
+    .annotation1-background {
+      opacity: 0;
+    }
+
+    .annotation2-background {
+      opacity: 0;
+    } 
+
+    .annotation3-background {
       opacity: 0;
     }
 
@@ -52,6 +68,12 @@
     .annotation-box {
       fill:white;
       opacity: 0.4;
+    }
+
+    .annotation-box3 {
+      fill: white;
+      opacity: 0.4;
+
     }
 
   </style>
@@ -95,7 +117,7 @@
 
         volcanoData.sort((a, b) => a.eruptionYear - b.eruptionYear);
 
-        const animationSpeed = 35;
+        const animationSpeed = 90;
         volcanoData.forEach(function(d, i) {
           d.delay = i * animationSpeed;
         });
@@ -119,7 +141,73 @@
           .text(d => d["Tectonic Setting"]); // set the title text to the Tectonic Setting
 
         const svg = d3.select("#map");
-        const annotationDelay = 200;
+        const annotationDelay = 1;
+
+        // Add title background
+        svg.append("rect")
+          .attr("class", "title-background")
+          .attr("x", 120) 
+          .attr("y", 4) 
+          .attr("width", 960) 
+          .attr("height", 36) 
+          .style("fill", "white")
+          .style("stroke", "black")
+          .style("stroke-width", 2)
+          .style("opacity", 0)
+          .transition()
+          .delay(20) // After 20 milliseconds
+          .style("opacity", 1); // Fade in  
+
+        // Add annotation1 background
+        svg.append("rect")
+          .attr("class", "annotation1-background")
+          .attr("x", 330) // Adjust these values
+          .attr("y", 70) // Adjust these values
+          .attr("width", 424) // Adjust these values
+          .attr("height", 36) // Adjust these values
+          .style("fill", "white")
+          .style("stroke", "black")
+          .style("stroke-width", 2)
+          .style("opacity", 0)
+          .transition()
+          .delay(2800) // After 2.8 sec
+          .style("opacity", 1) // Fade in 
+          .transition()
+          .delay(4000) // After 4000 milliseconds
+          .style("opacity", 0); // Fade out
+
+        // Add annotation2 background
+        svg.append("rect")
+          .attr("class", "annotation2-background")
+          .attr("x", 320) // Adjust these values
+          .attr("y", 70) // Adjust these values
+          .attr("width", 480) // Adjust these values
+          .attr("height", 36) // Adjust these values
+          .style("fill", "white")
+          .style("stroke", "black")
+          .style("stroke-width", 2)
+          .style("opacity", 0)
+          .transition()
+          .delay(6000) // After 6 seconds
+          .style("opacity", 1) // Fade in 
+          .transition()
+          .delay(4000) // After 4000 milliseconds
+          .style("opacity", 0); // Fade out
+
+        // Add annotation3 background
+        svg.append("rect")
+          .attr("class", "annotation3-background")
+          .attr("x", 260) // Adjust these values
+          .attr("y", 74) // Adjust these values
+          .attr("width", 680) // Adjust these values
+          .attr("height", 36) // Adjust these values
+          .style("fill", "white")
+          .style("stroke", "black")
+          .style("stroke-width", 2)
+          .style("opacity", 0)
+          .transition()
+          .delay(12000) // After 12 seconds
+          .style("opacity", 1); // Fade in
 
         // Add title
         svg.append("text")
@@ -128,30 +216,32 @@
           .attr("y", 30) // Top of the SVG
           .text("Volcanic Eruptions during the Holocene Epoch (c. 11,700 BCE to the present)")
           .style("opacity", 1)
+          .style("font-weight", "bold")
           .transition()
           .delay(2000) // After 2000 milliseconds
           .style("opacity", 1); // Fade out
 
         // Next Annotations
 
-        setTimeout(() => {
-        // Box first
-        svg.append("rect")
-          .attr("class", "annotation-box")
-          .attr("x", 600 - 150) // These may need adjustment
-          .attr("y", 60 - 20)
-          .attr("width", 300)
-          .attr("height", 40)
-          .style("opacity", 1)
-          .transition()
-          .delay(2000) // After 2000 milliseconds
-          .style("opacity", 0); // Fade out
-        })
+        // setTimeout(() => {
+        // // Box first
+        // svg.append("rect")
+        //   .attr("class", "annotation-box")
+        //   .attr("x", 600 - 150) // These may need adjustment
+        //   .attr("y", 60 - 20)
+        //   .attr("width", 600)
+        //   .attr("height", 40)
+        //   .style("opacity", 1)
+        //   .transition()
+        //   .delay(2000) // After 2000 milliseconds
+        //   .style("opacity", 0); // Fade out
+        // })
+
         setTimeout(() => {
           svg.append("text")
             .attr("class", "extra-annotation1")
-            .attr("x", 600) // Centre of the SVG
-            .attr("y", 60)  // A bit below the title
+            .attr("x", 540) // Centre of the SVG
+            .attr("y", 96)  // A bit below the title
             .text("All eruption sites marked in orange")
             .style("opacity", 1) // Fade in
             .transition()
@@ -162,9 +252,9 @@
         setTimeout(() => {
           svg.append("text")
             .attr("class", "extra-annotation2")
-            .attr("x", 600) // Centre of the SVG
-            .attr("y", 90) // A bit below the title
-            .text("When the year is known, an eruption is marked in red as the clock ticks")
+            .attr("x", 560) // Centre of the SVG
+            .attr("y", 96) // A bit below the title
+            .text("Eruptions marked in red for known years")
             .style("opacity", 1) // Fade in
             .transition()
             .delay(4000) // After 2000 msec
@@ -175,18 +265,19 @@
           svg.append("text")
             .attr("class", "extra-annotation3")
             .attr("x", 600) // Centre of the SVG
-            .attr("y", 120) // A bit below the title
-            .text("Hover over an eruption to learn its type and crust depth")
+            .attr("y", 100) // A bit below the title
+            .text("Hover over an eruption to see its type, depth, and year")
             .style("opacity", 1) // Fade in
+            .style("font-weight", "bold")
             .transition()
             .delay(6000) // After 2000 msec
             .style("opacity", 1); // Fade out
-        }, 9000); // Appear after 9 seconds
+        }, 12000); // Appear after 12 seconds
 
         svg.append("text")
           .attr("class", "annotation-text")
-          .attr("x", 50)
-          .attr("y", 30)
+          .attr("x", 200)
+          .attr("y", 100)
           .style("opacity", 0)
           .style("font-weight", "bold")
           .style("font-size", "24px");
