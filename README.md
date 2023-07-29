@@ -15,3 +15,4 @@ and countries.geojson, freely availble through various sites sourced from
 Natural Earth public domain map dataset (see https://www.naturalearthdata.com/,
 and for converted geojson format:  https://github.com/martynafford/natural-earth-geojson)
 
+Click on https://wjdavenport.github.io/CS416DVProject/scene1.html to get started.
