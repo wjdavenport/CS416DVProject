@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Volcano Map Visualization</title>
+  <style>
+    .volcano-circle {
+      fill: orange;
+      stroke: #fff;
+      stroke-width: 0.1;
+    }
+
+    .annotation-text {
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+      fill: blueviolet;
+      text-anchor: middle;
+      opacity: 0.7;
+    }
+
+    .title-text {
+      font-family: Arial, sans-serif;
+      font-size: 26px;
+      fill: orangered;
+      text-anchor: middle;
+      opacity: 0;
+    }
+
+    .title-background {
+      opacity: 0;
+    }
+
+    .extra-annotation1 {
+      font-family: Arial, sans-serif;
+      font-size: 26px;
+      fill: orange;
+      text-anchor: middle;
+      opacity: 0;
+    }
+
+    .annotation1-background {
+      opacity: 0;
+    }
+
+    .annotation2-background {
+      opacity: 0;
+    } 
+
+    .annotation3-background {
+      opacity: 0;
+    }
+
+    .extra-annotation2 {
+      font-family: Arial, sans-serif;
+      font-size: 26px;
+      fill: red;
+      text-anchor: middle;
+      opacity: 0;
+    }
+
+    .extra-annotation3 { 
+      font-family: Arial, sans-serif;
+      font-size: 26px;
+      fill: blueviolet;
+      text-anchor: middle;
+      opacity: 0;
+    }
+
+    .annotation-box {
+      fill:white;
+      opacity: 0.4;
+    }
+
+    .annotation-box3 {
+      fill: white;
+      opacity: 0.4;
+    }
+
+  </style>
+</head>
+<body>
+  <svg id="map" width="1200" height="900"></svg>
+
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script>
+    // Load world map GeoJSON data
+    d3.json("countries.geojson").then(function(worldData) {
+      d3.csv("GVP_Volcano_List_Holocene1.csv").then(function(volcanoData) {
+        const projection = d3.geoMercator()
+          .fitSize([1200, 900], worldData);
+
+        const pathGenerator = d3.geoPath().projection(projection);
+
+        const svg = d3.select("#map");
+
+        svg.selectAll("path")
+          .data(worldData.features)
+          .enter()
+          .append("path")
+          .attr("d", pathGenerator);
+
+        const zoom = d3.zoom()
+          .scaleExtent([1, 8])
+          .on("zoom", function(event) {
+            svg.selectAll("path")
+              .attr("transform", event.transform);
+            svg.selectAll(".volcano-circle")
+              .attr("transform", event.transform);
+          });
+
+        svg.call(zoom);
+
+        volcanoData.forEach(function(d) {
+          d.latitude = +d.Latitude;
+          d.longitude = +d.Longitude;
+          if (d["Last Known Eruption"] === "Unknown") {
+            d.eruptionYear = new Date("-99999");
+          } else {
+            const eruptionYear = d["Last Known Eruption"];
+            if (eruptionYear.endsWith("BCE")) {
+              const year = parseInt(eruptionYear.split(" ")[0]);
+              d.eruptionYear = new Date(-year, 0);
+            } else {
+              const year = parseInt(eruptionYear);
+              d.eruptionYear = new Date(year, 0);
+            }
+          }
+        });
+
+        volcanoData.sort((a, b) => a.eruptionYear - b.eruptionYear);
+
+        const animationSpeed = 90;
+        volcanoData.forEach(function(d, i) {
+          d.delay = i * animationSpeed;
+        });
+
+        d3.select("#map")
+          .selectAll(".initial-dots")
+          .data(volcanoData)
+          .enter()
+          .append("circle")
+          .attr("class", "volcano-circle initial-dots")
+          .attr("cx", function(d) {
+            const cx = projection([d.longitude, d.latitude])[0];
+            return cx;
+          })
+          .attr("cy", function(d) {
+            const cy = projection([d.longitude, d.latitude])[1];
+            return cy;
+          })
+          .attr("r", 1)
+          .append("title") // append a title to each circle
+          .text(d => d["Tectonic Setting"]); // set the title text to the Tectonic Setting
+
+        // Zoom to Iceland
+        const icelandCoordinates = projection([-19.0208, 64.9631]);  // approximate center of Iceland
+        const icelandZoomLevel = 4;  // arbitrary zoom level; adjust as needed
+        svg.call(zoom.transform, d3.zoomIdentity.translate(1200 / 2, 900 / 2).scale(icelandZoomLevel).translate(-icelandCoordinates[0], -icelandCoordinates[1]));
+
+        // Rest of your code...
+      }).catch(function(error) {
+        console.log("Error loading volcano data: " + error);
+      });
+    }).catch(function(error) {
+      console.log("Error loading map data: " + error);
+    });
+  </script>
+</body>
+</html>
