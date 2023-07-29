@@ -90,12 +90,38 @@
 
       const pathGenerator = d3.geoPath().projection(projection);
 
+      const svg = d3.select("#map");
+
+      svg.selectAll("path")
+        .data(worldData.features)
+        .enter()
+        .append("path")
+        .attr("d", pathGenerator);
+
+      const zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .on("zoom", function(event) {
+          svg.selectAll("path")
+            .attr("transform", event.transform);
+          svg.selectAll(".volcano-circle")
+            .attr("transform", event.transform);
+        });
+
+      svg.call(zoom);
+
+      // Zoom to Iceland
+      const icelandCoordinates = projection([-19.0208, 64.9631]);  // approximate center of Iceland
+      const icelandZoomLevel = 4;  // arbitrary zoom level; adjust as needed
+      svg.call(zoom.transform, d3.zoomIdentity.translate(1200 / 2, 900 / 2).scale(icelandZoomLevel).translate(-icelandCoordinates[0], -icelandCoordinates[1]));
+
       d3.select("#map")
         .selectAll("path")
         .data(worldData.features)
         .enter()
         .append("path")
         .attr("d", pathGenerator);
+
+      
 
       d3.csv("GVP_Volcano_List_Holocene1.csv").then(function(volcanoData) {
         volcanoData.forEach(function(d) {
@@ -222,20 +248,6 @@
           .style("opacity", 1); // Fade out
 
         // Next Annotations
-
-        // setTimeout(() => {
-        // // Box first
-        // svg.append("rect")
-        //   .attr("class", "annotation-box")
-        //   .attr("x", 600 - 150) // These may need adjustment
-        //   .attr("y", 60 - 20)
-        //   .attr("width", 600)
-        //   .attr("height", 40)
-        //   .style("opacity", 1)
-        //   .transition()
-        //   .delay(2000) // After 2000 milliseconds
-        //   .style("opacity", 0); // Fade out
-        // })
 
         setTimeout(() => {
           svg.append("text")
